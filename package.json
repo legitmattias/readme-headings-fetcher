@@ -1,0 +1,29 @@
+{
+  "name": "readme-headings-fetcher",
+  "version": "1.0.0",
+  "description": "This project contains a Node.js script that searches GitHub repositories for README files and extracts headings from the markdown content. It uses the GitHub API and requires a personal access token (PAT) for authentication.",
+  "main": "readme-headings-fetcher.js",
+  "scripts": {
+    "start": "node readme-headings-fetcher.js",
+    "dev": "nodemon --inspect readme-headings-fetcher.js",
+    "lint": "npx eslint ./readme-headings-fetcher.js || exit 0",
+    "lint:fix": "npx eslint ./readme-headings-fetcher.js --fix || exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/legitmattias/readme-headings-fetcher.git"
+  },
+  "author": "mu222cu@student.lnu.se",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/legitmattias/readme-headings-fetcher/issues"
+  },
+  "homepage": "https://github.com/legitmattias/readme-headings-fetcher#readme",
+  "devDependencies": {
+    "eslint": "^9.10.0",
+    "prettier": "^3.3.3"
+  },
+  "dependencies": {
+    "axios": "^1.7.7"
+  }
+}
