@@ -1,12 +1,12 @@
-# README Header Extractor
+# README Headings Fetcher
 
 ## Overview
-This project contains a Node.js script that searches GitHub repositories for README files and extracts headers from the markdown content. It uses the GitHub API and requires a personal access token (PAT) for authentication.
+This project contains a Node.js script that searches GitHub repositories for README files and extracts headings from the markdown content. It uses the GitHub API and requires a personal access token (PAT) for authentication.
 
 ## Features
 - Searches repositories based on a given query (e.g., repositories with a specific language).
 - Fetches README files from the found repositories.
-- Extracts headers (H1, H2, etc.) from the markdown content of the README files.
+- Extracts headings (H1, H2, etc.) from the markdown content of the README files.
 
 ## Usage
 
@@ -18,7 +18,7 @@ This project contains a Node.js script that searches GitHub repositories for REA
 1. Clone this repository:
    ```bash
    git clone https://github.com/legitmattias/readme-headings-fetcher.git
-   cd readme-header-extractor
+   cd readme-headings-fetcher
    ```
 
 2. Install dependencies:
@@ -31,12 +31,13 @@ This project contains a Node.js script that searches GitHub repositories for REA
    ```javascript
    const GITHUB_TOKEN = 'your_github_token_here';
    ```
+   It is recommended to use environment variables for storing sensitive information like the GitHub token.
 
 ### Running the Script
-You can run the script directly using Node.js. The script is configured to search for repositories and extract headers from their README files.
+You can run the script directly using Node.js. The script is configured to search for repositories and extract headings from their README files.
 
 ```bash
-node fetch_headers.js
+node fetch_readme_headings.js
 ```
 
 By default, the script searches for repositories that use JavaScript as the primary language and fetches the first 5 repositories. You can modify the query and the number of repositories to search within the script.
@@ -51,13 +52,13 @@ You can modify the query string to search for other languages or keywords.
 ## Output
 For each repository, the script will:
 1. Fetch the README.md content.
-2. Extract headers from the README file.
-3. Print the headers to the console.
+2. Extract headings from the README file.
+3. Print the headings to the console.
 
 Example output:
 ```
 Processing repository: octocat/Hello-World
-Headers found: [ '# Introduction', '## Setup', '## Usage', '# License' ]
+Headings found: [ '# Introduction', '## Setup', '## Usage', '# License' ]
 --------------------------------
 ```
 
