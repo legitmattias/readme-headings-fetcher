@@ -17,7 +17,7 @@ This project contains a Node.js script that searches GitHub repositories for REA
 ### Installation
 1. Clone this repository:
    ```bash
-   git clone https://github.com/legitmattias/readme-headings-extractor.git
+   git clone https://github.com/legitmattias/readme-headings-fetcher.git
    cd readme-header-extractor
    ```
 
