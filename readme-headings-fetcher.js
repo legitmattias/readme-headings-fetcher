@@ -15,20 +15,34 @@ const axiosInstance = axios.create({
   }
 })
 
-// Function to search for repositories with README.md
-async function searchRepositories (query, perPage = 10) {
-  try {
-    const response = await axiosInstance.get(`/search/repositories`, {
-      params: {
-        q: query, // Query (e.g., "language:javascript")
-        per_page: perPage
+// Function to search for repositories with README.md (handling pagination)
+async function searchRepositories(query, perPage = 10, maxPages = 3) {
+  let allRepositories = [];
+  
+  for (let page = 1; page <= maxPages; page++) {
+    try {
+      const response = await axiosInstance.get(`/search/repositories`, {
+        params: {
+          q: query,       // Query (e.g., "language:javascript")
+          per_page: perPage,
+          page: page      // Fetch the next page of results
+        }
+      });
+
+      allRepositories = allRepositories.concat(response.data.items); // Collect all repositories
+
+      // Check if there are no more results (e.g., if less than perPage results were returned)
+      if (response.data.items.length < perPage) {
+        break;  // Stop fetching pages if there are no more results
       }
-    })
-    return response.data.items // Return repository items
-  } catch (error) {
-    console.error('Error fetching repositories:', error.response?.data || error.message)
-    return []
+
+    } catch (error) {
+      console.error('Error fetching repositories:', error.response?.data || error.message);
+      break;  // Exit the loop if there’s an error
+    }
   }
+
+  return allRepositories;
 }
 
 // Function to get README.md for a given repository
@@ -102,7 +116,7 @@ function extractMainHeadingDescription(markdownText) {
 
 // Main function to search repositories and extract README headings
 async function main() {
-  const repositories = await searchRepositories('language:javascript', 25); // Adjust perPage as needed
+  const repositories = await searchRepositories('language:javascript', 5, 3);  // Query, READMEs per page (max: 100), pages.
 
   for (let repo of repositories) {
     const owner = repo.owner.login;
@@ -113,7 +127,6 @@ async function main() {
     const readmeContent = await getReadme(owner, repoName);
 
     if (readmeContent) {
-      // Extract headings and description separately
       const headings = extractHeadings(readmeContent);
       const description = extractMainHeadingDescription(readmeContent);
 
