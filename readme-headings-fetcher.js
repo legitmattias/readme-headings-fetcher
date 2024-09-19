@@ -16,9 +16,9 @@ const axiosInstance = axios.create({
 })
 
 // Function to search for repositories with README.md (handling pagination)
-async function searchRepositories(query, perPage = 10, maxPages = 3) {
-  let allRepositories = [];
-  
+async function searchRepositories (query, perPage = 10, maxPages = 3) {
+  let allRepositories = []
+
   for (let page = 1; page <= maxPages; page++) {
     try {
       const response = await axiosInstance.get(`/search/repositories`, {
@@ -27,22 +27,22 @@ async function searchRepositories(query, perPage = 10, maxPages = 3) {
           per_page: perPage,
           page: page      // Fetch the next page of results
         }
-      });
+      })
 
-      allRepositories = allRepositories.concat(response.data.items); // Collect all repositories
+      allRepositories = allRepositories.concat(response.data.items) // Collect all repositories
 
       // Check if there are no more results (e.g., if less than perPage results were returned)
       if (response.data.items.length < perPage) {
-        break;  // Stop fetching pages if there are no more results
+        break  // Stop fetching pages if there are no more results
       }
 
     } catch (error) {
-      console.error('Error fetching repositories:', error.response?.data || error.message);
-      break;  // Exit the loop if there’s an error
+      console.error('Error fetching repositories:', error.response?.data || error.message)
+      break  // Exit the loop if there’s an error
     }
   }
 
-  return allRepositories;
+  return allRepositories
 }
 
 // Function to get README.md for a given repository
@@ -59,71 +59,97 @@ async function getReadme (owner, repo) {
 }
 
 // Function to extract all headings from the markdown content
-function extractHeadings(markdownText) {
-  const headings = [];
-  const lines = markdownText.split('\n');
+function extractHeadings (markdownText) {
+  const headings = []
+  const lines = markdownText.split('\n')
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    const line = lines[i].trim()
     // Detect headings (Markdown heading levels start with '#')
     if (line.startsWith('#')) {
-      headings.push(line);
+      headings.push(line)
     }
   }
 
-  return headings;
+  return headings
 }
 
 // Function to extract the description that follows the main heading
 // Function to extract the description that follows the main heading
-function extractMainHeadingDescription(markdownText) {
-  const lines = markdownText.split('\n');
-  let foundMainHeading = false;
-  let foundBlankLine = false;
-  let description = '';
+function extractMainHeadingDescription (markdownText) {
+  const lines = markdownText.split('\n')
+  let foundMainHeading = false
+  let foundBlankLine = false
+  let description = ''
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
+    const line = lines[i].trim()
 
     // Detect the main heading (first # heading)
     if (line.startsWith('# ') && !foundMainHeading) {
-      foundMainHeading = true;
-      continue;
+      foundMainHeading = true
+      continue
     }
 
     // Capture text after a blank line that follows the main heading
     if (foundMainHeading && !foundBlankLine && line === '') {
-      foundBlankLine = true;  // Now start capturing description on the next non-blank line
-      continue;
+      foundBlankLine = true  // Now start capturing description on the next non-blank line
+      continue
     }
 
     if (foundBlankLine && line !== '') {
-      description += line + ' ';
+      description += line + ' '
     }
 
     // Stop collecting description when you hit another heading or a blank line
     if (foundBlankLine && (line.startsWith('#') || line === '')) {
-      break;  // Stop capturing description
+      break  // Stop capturing description
     }
   }
 
   if (!foundMainHeading) {
-    return 'No main heading found';
+    return 'No main heading found'
   }
 
-  return description.trim() || 'No description under main heading found';
+  return description.trim() || 'No description under main heading found'
 }
 
 async function checkRateLimit() {
-  const response = await axiosInstance.get('/rate_limit')
-  return response.data.rate
+  const response = await axiosInstance.get('/rate_limit');
+  return response.data.rate;
+}
+
+function formatResetTimetoISO(resetTimestamp) {
+  return new Date(resetTimestamp * 1000).toISOString(); // Convert from seconds to milliseconds and return ISO format
+}
+
+function formatTimestampToPretty(isoTimestamp) {
+  const [date, time] = isoTimestamp.split('T'); // Split ISO date and time
+  const formattedTime = time.slice(0, 5); // Extract HH:MM from the time
+
+  return `${date}, at ${formattedTime}`; // Return pretty format
 }
 
 // Main function to search repositories and extract README headings
 async function main() {
-  const repositories = await searchRepositories('language:javascript', 5, 3);  // Query, READMEs per page (max: 100), pages.
-  console.log('Rate limit status after current query: ', checkRateLimit())
+  // Search for repositories (example query)
+  const repositories = await searchRepositories('language:javascript', 1, 1); // Query, READMEs per page (max: 100), pages.
+  
+  // Get current time and format it
+  console.log('Query completed at ', formatTimestampToPretty(new Date().toISOString()));
+  
+  // Check rate limit status
+  const rateLimitStatus = await checkRateLimit();
+  console.log('Rate limit status after current query:');
+  console.log('Rate limit:', rateLimitStatus.limit);
+  console.log('Rate limit used:', rateLimitStatus.used);
 
+  // Convert and print the reset time in a pretty format
+  const isoResetTime = formatResetTimetoISO(rateLimitStatus.reset);
+  console.log('Rate limit resets at:', formatTimestampToPretty(isoResetTime));
+  console.log('--------------------------------\n');
+
+  // Loop through repositories and extract headings and description
   for (let repo of repositories) {
     const owner = repo.owner.login;
     const repoName = repo.name;
@@ -137,7 +163,6 @@ async function main() {
       const description = extractMainHeadingDescription(readmeContent);
 
       console.log('Description:', description);
-      console.log('Headings found:', headings);
     } else {
       console.log('No README found for this repository.');
     }
