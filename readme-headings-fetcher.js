@@ -75,7 +75,6 @@ function extractHeadings (markdownText) {
 }
 
 // Function to extract the description that follows the main heading
-// Function to extract the description that follows the main heading
 function extractMainHeadingDescription (markdownText) {
   const lines = markdownText.split('\n')
   let foundMainHeading = false
