@@ -44,44 +44,86 @@ async function getReadme (owner, repo) {
   }
 }
 
-// Function to extract headings from Markdown content
-function extractHeadings (markdownText) {
-  const headings = []
-  const lines = markdownText.split('\n')
+// Function to extract all headings from the markdown content
+function extractHeadings(markdownText) {
+  const headings = [];
+  const lines = markdownText.split('\n');
 
-  for (let line of lines) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    // Detect headings (Markdown heading levels start with '#')
     if (line.startsWith('#')) {
-      headings.push(line.trim()) // Collect Markdown headings
+      headings.push(line);
     }
   }
 
-  return headings
+  return headings;
+}
+
+// Function to extract the description that follows the main heading
+// Function to extract the description that follows the main heading
+function extractMainHeadingDescription(markdownText) {
+  const lines = markdownText.split('\n');
+  let foundMainHeading = false;
+  let foundBlankLine = false;
+  let description = '';
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    // Detect the main heading (first # heading)
+    if (line.startsWith('# ') && !foundMainHeading) {
+      foundMainHeading = true;
+      continue;
+    }
+
+    // Capture text after a blank line that follows the main heading
+    if (foundMainHeading && !foundBlankLine && line === '') {
+      foundBlankLine = true;  // Now start capturing description on the next non-blank line
+      continue;
+    }
+
+    if (foundBlankLine && line !== '') {
+      description += line + ' ';
+    }
+
+    // Stop collecting description when you hit another heading or a blank line
+    if (foundBlankLine && (line.startsWith('#') || line === '')) {
+      break;  // Stop capturing description
+    }
+  }
+
+  if (!foundMainHeading) {
+    return 'No main heading found';
+  }
+
+  return description.trim() || 'No description under main heading found';
 }
 
 // Main function to search repositories and extract README headings
-async function main () {
-  // Search for repositories (e.g., in JavaScript language)
-  const repositories = await searchRepositories('language:javascript', 5) // Adjust perPage as needed
+async function main() {
+  const repositories = await searchRepositories('language:javascript', 25); // Adjust perPage as needed
 
-  // Loop through each repository and get README headings
   for (let repo of repositories) {
-    const owner = repo.owner.login
-    const repoName = repo.name
+    const owner = repo.owner.login;
+    const repoName = repo.name;
 
-    console.log(`Processing repository: ${owner}/${repoName}`)
+    console.log(`Processing repository: ${owner}/${repoName}`);
 
-    // Get the README content
-    const readmeContent = await getReadme(owner, repoName)
+    const readmeContent = await getReadme(owner, repoName);
 
     if (readmeContent) {
-      // Extract headings from the README
-      const headings = extractHeadings(readmeContent)
-      console.log('Headings found:', headings)
+      // Extract headings and description separately
+      const headings = extractHeadings(readmeContent);
+      const description = extractMainHeadingDescription(readmeContent);
+
+      console.log('Description:', description);
+      console.log('Headings found:', headings);
     } else {
-      console.log('No README found for this repository.')
+      console.log('No README found for this repository.');
     }
 
-    console.log('--------------------------------')
+    console.log('--------------------------------');
   }
 }
 
