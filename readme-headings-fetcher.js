@@ -114,9 +114,15 @@ function extractMainHeadingDescription(markdownText) {
   return description.trim() || 'No description under main heading found';
 }
 
+async function checkRateLimit() {
+  const response = await axiosInstance.get('/rate_limit')
+  return response.data.rate
+}
+
 // Main function to search repositories and extract README headings
 async function main() {
   const repositories = await searchRepositories('language:javascript', 5, 3);  // Query, READMEs per page (max: 100), pages.
+  console.log('Rate limit status after current query: ', checkRateLimit())
 
   for (let repo of repositories) {
     const owner = repo.owner.login;
